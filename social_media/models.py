@@ -1,6 +1,7 @@
 import os
 import uuid
 
+from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 
@@ -20,5 +21,5 @@ class Post(models.Model):
     title = models.CharField(max_length=255)
     text = models.TextField()
     tags = models.ManyToManyField(Tag, related_name="posts")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="posts")
     image = models.ImageField(null=True, upload_to=post_image_file_path)
