@@ -57,7 +57,7 @@ class User(AbstractUser):
 
 def user_photo_file_path(instance, filename):
     _, extension = os.path.splitext(filename)
-    filename = f"{slugify(instance.title)}-{uuid.uuid4()}{extension}"
+    filename = f"{slugify(instance.user)}-{uuid.uuid4()}{extension}"
 
     return os.path.join("uploads/users/", filename)
 
@@ -66,5 +66,5 @@ class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
     nickname = models.CharField(max_length=63, null=True)
     photo = models.ImageField(null=True, upload_to=user_photo_file_path)
-    followers = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="users")
+    followers = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="profiles")
     bio = models.TextField(max_length=200, null=True, default="Bio")

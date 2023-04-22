@@ -9,6 +9,9 @@ from django.utils.text import slugify
 class Tag(models.Model):
     name = models.CharField(max_length=63)
 
+    def __str__(self):
+        return self.name
+
 
 def post_image_file_path(instance, filename):
     _, extension = os.path.splitext(filename)

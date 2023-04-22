@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from social_media.models import Tag, Post
-from social_media.permissions import IsAdminOrIfAuthenticatedReadOnly
 from social_media.serializers import TagSerializer, PostSerializer, PostListSerializer, PostDetailSerializer, \
     PostImageSerializer
 
@@ -15,7 +14,7 @@ from social_media.serializers import TagSerializer, PostSerializer, PostListSeri
 class TagViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
 
 class PostPagination(PageNumberPagination):
@@ -24,15 +23,13 @@ class PostPagination(PageNumberPagination):
 
 
 class PostViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
+
+    viewsets.ModelViewSet,
 ):
-    queryset = Post.objects.prefetch_related("tag")
+    queryset = Post.objects.prefetch_related("tags")
     serializer_class = PostSerializer
     pagination_class = PostPagination
-    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    permission_classes = (IsAuthenticated,)
 
 
     @staticmethod
@@ -51,7 +48,7 @@ class PostViewSet(
 
         if tags:
             tags_ids = self._params_to_ints(tags)
-            queryset = queryset.fiter(tags__id__in=tags_ids)
+            queryset = queryset.filter(tags__id__in=tags_ids)
 
         return queryset.distinct()
 

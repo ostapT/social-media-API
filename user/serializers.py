@@ -29,16 +29,16 @@ class UserSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ("id", "user", "bio")
+        fields = ("id", "user", "bio", "nickname", "photo")
 
 
-class ProfileListSerializer(ProfileSerializer):
+class ProfileListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ("id", "user", "nickname")
 
 
-class ProfileDetailSerializer(ProfileSerializer):
+class ProfileDetailSerializer(serializers.ModelSerializer):
     followers = serializers.SlugRelatedField(
         many=True, read_only=True, slug_field="nickname"
     )
@@ -46,3 +46,10 @@ class ProfileDetailSerializer(ProfileSerializer):
     class Meta:
         model = Profile
         fields = ("id", "user", "nickname", "bio", "photo", "followers")
+
+
+class ProfileImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Profile
+        fields = ("id", "image")

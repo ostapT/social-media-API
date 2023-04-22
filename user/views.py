@@ -2,10 +2,14 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from rest_framework import generics, viewsets, mixins, status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from user.models import Profile
-from user.serializers import UserSerializer, ProfileSerializer, ProfileListSerializer, ProfileDetailSerializer
+from user.serializers import UserSerializer, ProfileSerializer, ProfileListSerializer, ProfileDetailSerializer, \
+    ProfileImageSerializer
 
 
 class CreateUserView(generics.CreateAPIView):
@@ -34,7 +38,10 @@ class ProfileViewSet(viewsets.ModelViewSet):
             return ProfileListSerializer
 
         if self.action == "retrieve":
-            return ProfileDetailSerializer
+            return ProfileSerializer
+
+        if self.action == "upload-image":
+            return ProfileImageSerializer
 
         return self.serializer_class
 
@@ -53,14 +60,30 @@ class UserFollowersViewSet(
 
 
 def follow_toggle(request, pk):
+
     another_user = get_user_model().objects.get(id=pk)
     current_user = get_user_model().objects.get(id=request.user.id)
-    followers = current_user.followers.all()
+    followers = current_user.profile.followers.all()
 
     if pk != current_user.id:
-        if current_user in followers:
-            another_user.followers.remove(current_user.id)
+        if another_user in followers:
+            current_user.profile.followers.remove(another_user.id)
         else:
-            another_user.following.add(current_user.id)
+            current_user.profile.followers.add(another_user.id)
 
     return HttpResponse(status=status.HTTP_200_OK)
+
+
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    @staticmethod
+    def post(request):
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
