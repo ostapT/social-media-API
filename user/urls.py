@@ -6,7 +6,13 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
-from user.views import CreateUserView, ManageUserView, follow_toggle, ProfileViewSet, UserFollowersViewSet, LogoutView
+from user.views import (
+    CreateUserView,
+    ManageUserView,
+    ProfileViewSet,
+    UserFollowersViewSet,
+    LogoutView,
+)
 
 router = routers.DefaultRouter()
 
@@ -22,6 +28,5 @@ urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("me/", ManageUserView.as_view(), name="manage"),
-    path("follow/<int:pk>/", follow_toggle, name="follow_toggle"),
-    path("logout/", LogoutView.as_view(), name="user_logout")
+    path("logout/", LogoutView.as_view(), name="user_logout"),
 ]

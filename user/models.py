@@ -63,8 +63,16 @@ def user_photo_file_path(instance, filename):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="profile"
+    )
     nickname = models.CharField(max_length=63, null=True)
     photo = models.ImageField(null=True, upload_to=user_photo_file_path)
-    followers = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="profiles")
+    followers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        related_name="profiles"
+    )
     bio = models.TextField(max_length=200, null=True, default="Bio")

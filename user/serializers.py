@@ -30,6 +30,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ("id", "user", "bio", "nickname", "photo")
+        read_only_fields = ("id", "user")
 
 
 class ProfileListSerializer(serializers.ModelSerializer):
@@ -40,7 +41,10 @@ class ProfileListSerializer(serializers.ModelSerializer):
 
 class ProfileDetailSerializer(serializers.ModelSerializer):
     followers = serializers.SlugRelatedField(
-        many=True, read_only=True, slug_field="nickname"
+        source="user.profiles",
+        many=True,
+        read_only=True,
+        slug_field="nickname",
     )
 
     class Meta:

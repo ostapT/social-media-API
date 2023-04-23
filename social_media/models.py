@@ -24,5 +24,9 @@ class Post(models.Model):
     title = models.CharField(max_length=255)
     text = models.TextField()
     tags = models.ManyToManyField(Tag, related_name="posts")
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="posts")
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="posts"
+    )
     image = models.ImageField(null=True, upload_to=post_image_file_path)

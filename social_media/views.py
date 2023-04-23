@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -7,11 +8,20 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from social_media.models import Tag, Post
-from social_media.serializers import TagSerializer, PostSerializer, PostListSerializer, PostDetailSerializer, \
-    PostImageSerializer
+from social_media.serializers import (
+    TagSerializer,
+    PostSerializer,
+    PostListSerializer,
+    PostDetailSerializer,
+    PostImageSerializer,
+)
 
 
-class TagViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
+class TagViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (IsAuthenticated,)
@@ -31,7 +41,6 @@ class PostViewSet(
     pagination_class = PostPagination
     permission_classes = (IsAuthenticated,)
 
-
     @staticmethod
     def _params_to_ints(qs):
         """Converts a list of string IDs to a list of integers"""
@@ -40,8 +49,11 @@ class PostViewSet(
     def get_queryset(self):
         title = self.request.query_params.get("title")
         tags = self.request.query_params.get("tags")
-
-        queryset = self.queryset.filter(author=self.request.user)
+        followed_ids = self.request.user.profile.followers.all()
+        user_id = self.request.user.profile.id
+        queryset = self.queryset.filter(
+            author__in=list(followed_ids) + [user_id]
+        )
 
         if title:
             queryset = queryset.filter(title__icontains=title)
@@ -83,3 +95,20 @@ class PostViewSet(
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="title",
+                type=OpenApiTypes.STR,
+                description="Filter by title (ex. ?title=SpaceX)",
+            ),
+            OpenApiParameter(
+                name="tags",
+                type={"type": "list", "items": {"type": "number"}},
+                description="Filter by tag id (ex. ?tag=1,2)",
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
